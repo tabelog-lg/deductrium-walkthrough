@@ -2,7 +2,15 @@ name: Rebuild walkthrough archives
 
 # 静态站点无法在浏览器里列目录，因此采用「构建期扫描 + 提交回仓库」：
 # 只要新增/删除 .md 存档、改了文章配置、脚本或查看器，就自动重建主页与全部中心页。
-# 生成的 index.html / docs/ 不列入 paths，因此机器人自己的 commit 不会再次触发。
+#
+# ★ 为什么回推必须用 PAT，而不是 GITHUB_TOKEN：
+#   本仓 Pages 是「Deploy from a branch / main / (root)」。GitHub 规定
+#   「用 GITHUB_TOKEN 的 Actions 工作流推送的提交不会触发 GitHub Pages 构建」，
+#   所以早期版本虽然把重建结果写回了仓库，线上却永远停在上一版。
+#   改用仓库 Secret「PAT」（细粒度、只授本仓 Contents: read & write）后，
+#   回推被 GitHub 视为真人推送 → 触发 pages build and deployment。
+#   同时删掉 commit message 里的 [skip ci]，让回推也能触发本工作流；
+#   第二次运行因 gen_walkthrough.py 幂等（无差异就不 commit）自然终止，不会循环。
 on:
   push:
     branches: [main]
@@ -21,18 +29,31 @@ on:
       - '.github/workflows/walkthrough.yml'
   workflow_dispatch:
 
+# checkout 与 push 都用 PAT；默认 token 只需读权限即可
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: walkthrough-rebuild
-  cancel-in-progress: true
+  cancel-in-progress: false   # 让 PAT 回推触发的第二次（幂等空跑）排队跑完，别互相取消
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Verify PAT secret
+        env:
+          PAT: ${{ secrets.PAT }}
+        run: |
+          if [ -z "$PAT" ]; then
+            echo "::error::缺少名为 PAT 的仓库 Secret。请到 Settings → Secrets and variables → Actions 添加：fine-grained PAT，Repository access 只选本仓，Permissions 勾选 Contents: Read and write。没有它，回推不会触发 GitHub Pages 构建。"
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+          ref: main
 
       - uses: actions/setup-python@v5
         with:
@@ -50,6 +71,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes, skip commit."
           else
-            git commit -m "chore: normalize filenames and rebuild walkthrough pages [skip ci]"
+            # 不要加 [skip ci]：这次回推必须触发 Pages 构建
+            git commit -m "chore: normalize filenames and rebuild walkthrough pages"
             git push
           fi

@@ -57,16 +57,48 @@ deductrium-walkthrough/
 
 ---
 
-## 部署（3 步）
+## 部署（4 步）
 
 1. 在 GitHub 新建仓库，**名字就叫 `deductrium-walkthrough`**，把本目录全部文件推到 `main`。
 2. Settings → Pages → Build and deployment → Source 选 **Deploy from a branch**，分支 `main` / 目录 `/ (root)`。
-3. Settings → Actions → General → Workflow permissions 勾 **Read and write**（工作流要把生成结果 commit 回仓库）。
+3. **配置 `PAT` Secret**（见下一节，必须做）。没有它，重建结果虽写回仓库，线上却不会更新。
+4. 触发一次构建：随便 push 一个空提交，或在 Actions 里手动 `Run workflow`。
 
 推完访问 `https://tabelog-lg.github.io/deductrium-walkthrough/` 即可。
 
 > 仓库名、原站链接硬编码在 `scripts/shell_common.py`（`REPO_NAME` / `REPO_URL` / `SITE_URL`）、
 > `assets/site.js` 和 `404.html` 里。**改仓库名时同步改这三处**，其余全站路径都是相对路径，不用动。
+> `Settings → Actions → General → Workflow permissions` 保持默认 `Read repository contents` 即可，
+> 写操作走 PAT，不再依赖 `GITHUB_TOKEN` 的写权限。
+
+---
+
+## 为什么需要 PAT（不配会静默滞后）
+
+本仓 Pages 用 **Deploy from a branch / main / (root)**，构建由「push 到 main」触发。
+而 GitHub 明确规定：**用 `GITHUB_TOKEN` 的 Actions 工作流推送的提交不会触发
+GitHub Pages 构建**。早期版本的工作流正是用 `GITHUB_TOKEN` 回推重建页面，
+还带 `[skip ci]`，结果就是：仓库里的 `index.html` / `docs/` 是最新的，
+线上却停在上一版，而且不报任何错。
+
+修法：回推改用**细粒度 PAT**，让 GitHub 把这次推送当成真人推送。
+
+**创建 PAT**（在账号级设置里操作一次）：
+
+1. 头像 → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token。
+2. Name 随意；**Repository access** 选 *Only select repositories*，只勾 `deductrium-walkthrough`。
+3. **Permissions → Repository permissions → Contents: `Read and write`**（其余一律不动，不要给 Workflows 权限）。
+4. Expiration 建议选最长；记得到期前换新值。
+5. 生成后复制 token。
+
+**加到仓库**：`Settings → Secrets and variables → Actions → New repository secret`，
+名字**必须**是 `PAT`，值粘贴刚才的 token。
+
+工作流第一步会检查这个 Secret，缺失时直接 `::error::` 失败并提示，不会静默跑完。
+
+> 用经典 PAT（`repo` scope）也行，但权限范围大，推荐细粒度。
+> 如果你更愿意把 Pages 的 Source 改成 **GitHub Actions**，那就完全不需要 PAT ——
+> 但那是另一套发布模式，与当前 branch 模式二选一，不要混用。
 
 ---
 
@@ -77,8 +109,15 @@ deductrium-walkthrough/
 push 命中任一项就自动跑 `python3 scripts/gen_walkthrough.py`，把**改名后的文件、
 `names.json`、生成的主页与中心页一起提交**回仓库。
 
-生成的 `index.html` / `docs/` 故意不列入 `paths`，加上 commit message 里的 `[skip ci]`，
-双保险防止机器人自己触发自己。新增 / 删除 / 改名存档，你只需要 `git push`。
+**回推机制（已修）**：提交用 `secrets.PAT` 推送、commit message **不带 `[skip ci]`**。
+这样那次回推会同时触发 `pages build and deployment`（线上更新）和本工作流再跑一次；
+第二次因 `gen_walkthrough.py` 幂等，`git diff --staged --quiet` 为真 → 不 commit → 链条自然停。
+
+所以每次你 push 一份新 `.md`，正常会看到 **2 次 Rebuild 运行 + 1 次 Pages 部署**：
+第 1 次改名/重建并回推，第 2 次空跑确认。这是设计如此，不是死循环。
+`concurrency` 用 `cancel-in-progress: false`，避免这两次互相取消。
+
+新增 / 删除 / 改名存档，你只需要 `git push`。
 
 想本地预览：
 
