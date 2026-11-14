@@ -10,9 +10,28 @@
     --md-primary: #4a6cf7;
 }
 
+/* ★ 关键：原站 site.css 把 body 设成横向 flex（display:flex +
+   justify-content:center + padding:32px 24px），并给 .has-site-nav 加了
+   !important 的 padding-top。那是给「.site-nav + .container」并排布局用的。
+   view.html 复用了同样的 body class，结果顶栏与文档区被当成两个并排 flex
+   item：顶栏缩成左上角一小块、文档被挤到右边、顶部还多出 84px。
+   viewer.css 只在查看器页加载，可安全覆盖回标准块级流（不影响主页/中心页）。
+   字体、背景、颜色等继承 site.css 的部分全部保留。 */
+body.page-walkthrough {
+    display: block !important;
+    justify-content: normal !important;
+    align-items: normal !important;
+    flex-wrap: normal !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+}
+
 .md-topbar {
+    /* 固定在最上部，且整条工具组居中（不再左侧贴边、按钮被推到最右） */
     position: sticky; top: 0; z-index: 30;
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 10px;
     padding: 10px 20px;
     background: rgba(255, 255, 255, .94);
     backdrop-filter: blur(8px);
@@ -27,7 +46,7 @@
     font-size: 12.5px; color: var(--md-fg);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw;
 }
-.md-topbar__spacer { flex: 1; }
+.md-topbar__spacer { display: none; }  /* 居中布局下不再需要撑开左右 */
 .md-btn {
     flex: none; padding: 6px 12px;
     border: 1px solid var(--md-line); border-radius: 7px;
@@ -40,12 +59,17 @@
 .md-btn--primary:hover { color: #fff; opacity: .88; }
 
 .md-layout {
+    /* 目录仍是左侧相邻的一列，宽度 230px、间距 28px 与原来完全一致；
+       正文列宽固定 780px，并「严格居中于视口」：
+       容器左边缘 = 50% - (目录 230 + 间距 28 + 正文 780/2) = 50% - 648px，
+       于是正文列中心恰好落在视口中心线上，目录仍挂在它左边。 */
     display: grid;
-    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-columns: 230px minmax(0, 780px);
     gap: 28px;
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 24px 22px 60px;
+    width: calc(230px + 28px + 780px);
+    max-width: calc(100% - 44px);
+    margin-left: calc(50% - 648px);
+    padding: 24px 0 60px;
 }
 .md-side { position: sticky; top: 62px; align-self: start; max-height: calc(100vh - 90px); overflow: auto; font-size: 12.5px; }
 .md-toc__title { font-weight: 700; color: var(--md-muted); margin-bottom: 8px; letter-spacing: .3px; }
@@ -144,12 +168,19 @@
 .md-foot code { background: var(--md-code-bg); padding: 1px 5px; border-radius: 3px; }
 .md-foot a { color: var(--md-primary); text-decoration: none; }
 
-@media (max-width: 900px) {
-    .md-layout { grid-template-columns: 1fr; gap: 0; padding: 18px 16px 48px; }
+/* 视口不够宽时（margin-left 会变负、目录挤出屏幕），
+   目录收起，正文独占一列并居中 */
+@media (max-width: 1320px) {
+    .md-layout {
+        display: block;
+        width: auto;
+        max-width: 780px;
+        margin: 0 auto;
+        padding: 18px 16px 48px;
+    }
     .md-side { display: none; }
-    .md-topbar { padding: 9px 12px; gap: 7px; flex-wrap: wrap; }
+    .md-topbar { padding: 9px 12px; gap: 7px; }
     .md-topbar__file { max-width: 60vw; }
     .md-topbar__sep { display: none; }
-    .md-topbar__spacer { display: none; }
     .md-btn { padding: 5px 9px; font-size: 12px; }
 }

@@ -8,12 +8,13 @@
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="assets/site.css">
     <link rel="stylesheet" href="assets/vendor/katex.min.css">
-    <link rel="stylesheet" href="assets/viewer.css">
+    <link rel="stylesheet" href="assets/viewer.css?v=2">
     <!-- defer 保证执行顺序：markdown-it → katex → auto-render → viewer -->
+    <!-- ?v=2 破缓存：改过 viewer.js / viewer.css 后，浏览器会重新拉取而不是沿用旧副本 -->
     <script src="assets/vendor/markdown-it.min.js" defer></script>
     <script src="assets/vendor/katex.min.js" defer></script>
     <script src="assets/vendor/auto-render.min.js" defer></script>
-    <script src="assets/viewer.js" defer></script>
+    <script src="assets/viewer.js?v=2" defer></script>
 </head>
 <body class="page-walkthrough has-site-nav" data-section="walkthrough">
     <header class="md-topbar">

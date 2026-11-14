@@ -236,7 +236,15 @@
         location.href = u.toString();
     });
 
-    fetch(encodeURI(rawFile), { cache: 'force-cache' })
+    /* ★ 每次都回源取当前部署的那一份 .md。
+       早期版本用 `cache: 'force-cache'`，浏览器会一直复用第一次看到的旧文件：
+       仓库里的存档被替换/覆盖、Pages 也重新部署了，页面却仍显示旧内容（例如示例文档），
+       而且连一个网络请求都不发，极难察觉。
+       时间戳让 URL 每次不同（破浏览器 / CDN 的 URL 级缓存），no-store 禁止条件请求。
+       代价是每次查看多一次全量下载（中位 15 KB、最大 130 KB），存档站完全可接受。
+       下载 / 原文按钮仍是直链，不受影响。 */
+    var mdUrl = encodeURI(rawFile) + '?v=' + Date.now();
+    fetch(mdUrl, { cache: 'no-store' })
         .then(function (r) {
             if (!r.ok) throw new Error('HTTP ' + r.status);
             return r.text();
