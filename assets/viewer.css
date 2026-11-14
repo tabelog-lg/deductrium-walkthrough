@@ -1,0 +1,155 @@
+/* ==========================================================================
+   viewer.css · 按需查看器排版（与原站 site.css 共存，不改动原文件）
+   ========================================================================== */
+
+:root {
+    --md-fg: #24292f;
+    --md-muted: #6b7280;
+    --md-line: #e3e7ed;
+    --md-code-bg: #f6f8fa;
+    --md-primary: #4a6cf7;
+}
+
+.md-topbar {
+    position: sticky; top: 0; z-index: 30;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, .94);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--md-line);
+    font-size: 13px;
+}
+.md-back { color: var(--md-primary); text-decoration: none; font-weight: 700; white-space: nowrap; }
+.md-back:hover { text-decoration: underline; }
+.md-topbar__sep { color: #c3cad6; }
+.md-topbar__file {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px; color: var(--md-fg);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42vw;
+}
+.md-topbar__spacer { flex: 1; }
+.md-btn {
+    flex: none; padding: 6px 12px;
+    border: 1px solid var(--md-line); border-radius: 7px;
+    background: #fff; color: var(--md-fg);
+    font-size: 12.5px; font-family: inherit; text-decoration: none; cursor: pointer;
+    white-space: nowrap;
+}
+.md-btn:hover { border-color: var(--md-primary); color: var(--md-primary); }
+.md-btn--primary { background: var(--md-primary); border-color: var(--md-primary); color: #fff; }
+.md-btn--primary:hover { color: #fff; opacity: .88; }
+
+.md-layout {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 28px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 24px 22px 60px;
+}
+.md-side { position: sticky; top: 62px; align-self: start; max-height: calc(100vh - 90px); overflow: auto; font-size: 12.5px; }
+.md-toc__title { font-weight: 700; color: var(--md-muted); margin-bottom: 8px; letter-spacing: .3px; }
+.md-side ul { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--md-line); }
+.md-side li a {
+    display: block; padding: 4px 10px;
+    color: var(--md-muted); text-decoration: none;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.md-side li a:hover { color: var(--md-primary); background: #f3f6ff; }
+.md-side .md-toc__h3 a { padding-left: 22px; font-size: 12px; }
+
+.md-main { min-width: 0; }
+.md-meta { color: var(--md-muted); font-size: 12.5px; margin-bottom: 14px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+.md-status {
+    padding: 22px 24px; border: 1px solid var(--md-line);
+    border-radius: 10px; background: #fafbfc; color: var(--md-muted); font-size: 14px;
+}
+.md-status.is-error { border-color: #f0c2c2; background: #fff6f6; color: #8b2e2e; }
+.md-status strong { color: var(--md-fg); }
+.md-status.is-error strong { color: #8b2e2e; }
+.md-status a { color: var(--md-primary); }
+
+/* ---------- 正文 ---------- */
+.md-body {
+    color: var(--md-fg);
+    font-size: 15px; line-height: 1.78;
+    word-wrap: break-word;
+}
+.md-body > :first-child { margin-top: 0; }
+.md-body h1, .md-body h2, .md-body h3, .md-body h4 {
+    line-height: 1.4; margin: 1.6em 0 .6em; font-weight: 700;
+    scroll-margin-top: 70px;
+}
+.md-body h1 { font-size: 1.7em; border-bottom: 1px solid var(--md-line); padding-bottom: .3em; }
+.md-body h2 { font-size: 1.35em; border-bottom: 1px solid var(--md-line); padding-bottom: .25em; }
+.md-body h3 { font-size: 1.15em; }
+.md-body h4 { font-size: 1em; }
+.md-body p, .md-body ul, .md-body ol, .md-body blockquote, .md-body table, .md-body pre { margin: 0 0 1em; }
+.md-body ul, .md-body ol { padding-left: 1.8em; }
+.md-body li { margin: .25em 0; }
+.md-body a { color: var(--md-primary); text-decoration: none; }
+.md-body a:hover { text-decoration: underline; }
+.md-body blockquote {
+    padding: 2px 16px; border-left: 4px solid #c9d5ff;
+    background: #f7f9ff; color: #3c4658;
+}
+.md-body blockquote > :last-child { margin-bottom: 0; }
+.md-body hr { border: 0; border-top: 1px solid var(--md-line); margin: 2em 0; }
+
+.md-body code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .88em; background: var(--md-code-bg);
+    padding: .15em .4em; border-radius: 4px; border: 1px solid #edf0f4;
+}
+.md-body pre {
+    position: relative;
+    background: var(--md-code-bg); border: 1px solid var(--md-line);
+    border-radius: 8px; padding: 14px 16px; overflow: auto;
+    line-height: 1.6; font-size: 13px;
+}
+.md-body pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+.md-copy {
+    position: absolute; top: 8px; right: 8px;
+    padding: 3px 9px; font-size: 11.5px; font-family: inherit;
+    border: 1px solid var(--md-line); border-radius: 5px;
+    background: #fff; color: var(--md-muted); cursor: pointer;
+    opacity: 0; transition: opacity .15s;
+}
+.md-body pre:hover .md-copy { opacity: 1; }
+
+.md-body table { border-collapse: collapse; display: block; overflow-x: auto; max-width: 100%; font-size: 14px; }
+.md-body th, .md-body td { border: 1px solid var(--md-line); padding: 7px 12px; text-align: left; }
+.md-body th { background: #f6f8fa; font-weight: 700; }
+.md-body tr:nth-child(even) td { background: #fcfdfe; }
+
+/* 游戏记号 <Esc> <a1> 等被转义后显示为文本，用等宽体标出更清楚 */
+.md-body s { text-decoration: line-through; opacity: .7; }
+
+/* ---------- 数学 ---------- */
+.md-math-block { display: block; }
+.md-body .katex-display {
+    overflow-x: auto; overflow-y: hidden;
+    padding: 6px 0; margin: 1.1em 0;
+}
+.md-body .katex-display > .katex { white-space: nowrap; }
+.md-math-inline .katex { font-size: 1.02em; }
+.katex-error { color: #c0392b; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
+
+.md-foot {
+    display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+    margin-top: 36px; padding-top: 16px;
+    border-top: 1px solid var(--md-line);
+    color: var(--md-muted); font-size: 12px;
+}
+.md-foot code { background: var(--md-code-bg); padding: 1px 5px; border-radius: 3px; }
+.md-foot a { color: var(--md-primary); text-decoration: none; }
+
+@media (max-width: 900px) {
+    .md-layout { grid-template-columns: 1fr; gap: 0; padding: 18px 16px 48px; }
+    .md-side { display: none; }
+    .md-topbar { padding: 9px 12px; gap: 7px; flex-wrap: wrap; }
+    .md-topbar__file { max-width: 60vw; }
+    .md-topbar__sep { display: none; }
+    .md-topbar__spacer { display: none; }
+    .md-btn { padding: 5px 9px; font-size: 12px; }
+}

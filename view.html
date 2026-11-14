@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查看存档 · Deductrium 攻略存档</title>
+    <meta name="description" content="按需读取 Markdown 并在浏览器内渲染，不预生成 HTML。">
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="assets/site.css">
+    <link rel="stylesheet" href="assets/vendor/katex.min.css">
+    <link rel="stylesheet" href="assets/viewer.css">
+    <!-- defer 保证执行顺序：markdown-it → katex → auto-render → viewer -->
+    <script src="assets/vendor/markdown-it.min.js" defer></script>
+    <script src="assets/vendor/katex.min.js" defer></script>
+    <script src="assets/vendor/auto-render.min.js" defer></script>
+    <script src="assets/viewer.js" defer></script>
+</head>
+<body class="page-walkthrough has-site-nav" data-section="walkthrough">
+    <header class="md-topbar">
+        <a class="md-back" id="md-back" href="index.html">← 攻略存档</a>
+        <span class="md-topbar__sep">/</span>
+        <span class="md-topbar__file" id="md-title">载入中…</span>
+        <span class="md-topbar__spacer"></span>
+        <button class="md-btn" id="md-math-toggle" type="button">公式：开</button>
+        <a class="md-btn" id="md-raw" href="#" target="_blank" rel="noopener">原文 .md</a>
+        <a class="md-btn md-btn--primary" id="md-download" href="#" download>下载 ↓</a>
+    </header>
+
+    <div class="md-layout">
+        <aside class="md-side" id="md-toc" hidden></aside>
+
+        <main class="md-main">
+            <div class="md-meta" id="md-meta"></div>
+
+            <div class="md-status" id="md-status">
+                <strong>正在读取并渲染…</strong>
+                <p>只下载当前这一份 .md，仓库里没有为每个存档预生成 HTML。</p>
+            </div>
+
+            <article class="md-body" id="md-body" hidden></article>
+
+            <footer class="md-foot">
+                <span>由 <code>markdown-it</code> + <code>KaTeX</code> 在浏览器内实时渲染 · 源码仍是单份 .md</span>
+                <a href="index.html">返回攻略存档</a>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        /* 从中心页点进来的话，「←」优先回到来源页 */
+        (function () {
+            try {
+                if (document.referrer && new URL(document.referrer).origin === location.origin) {
+                    var a = document.getElementById('md-back');
+                    a.addEventListener('click', function (e) {
+                        if (history.length > 1) { e.preventDefault(); history.back(); }
+                    });
+                }
+            } catch (e) { /* 忽略 */ }
+        })();
+    </script>
+</body>
+</html>
